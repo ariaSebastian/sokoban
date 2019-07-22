@@ -4,6 +4,18 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
  
+class Board {
+    String cur, sol;
+    int x, y;
+
+    Board(String s1, String s2, int px, int py) {
+        cur = s1;
+        sol = s2;
+        x = px;
+        y = py;
+    }
+}
+
 public class Sokoban {
     String destBoard, currBoard;
     boolean player = false;
@@ -160,18 +172,6 @@ public class Sokoban {
     }
 
     String algAmplitude(int[][] dirs, char[][] dirLabels){
-        class Board {
-            String cur, sol;
-            int x, y;
- 
-            Board(String s1, String s2, int px, int py) {
-                cur = s1;
-                sol = s2;
-                x = px;
-                y = py;
-            }
-        }
-
         Set<String> history = new HashSet<>();
         LinkedList<Board> open = new LinkedList<>();
  
@@ -222,18 +222,6 @@ public class Sokoban {
     }
 
     String algDepth(int[][] dirs, char[][] dirLabels){
-        class Board {
-            String cur, sol;
-            int x, y;
- 
-            Board(String s1, String s2, int px, int py) {
-                cur = s1;
-                sol = s2;
-                x = px;
-                y = py;
-            }
-        }
-
         Set<String> history = new HashSet<>();
         LinkedList<Board> open = new LinkedList<>();
  
