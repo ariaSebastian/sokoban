@@ -1,2 +1,4 @@
 #! /bin/bash
-docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp openjdk:7 java Sokoban $1
+board=""
+while read line; do board="$board;$line"; done
+docker run --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp openjdk:7 java Sokoban $board

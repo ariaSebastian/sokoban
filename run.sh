@@ -1,2 +1,4 @@
 #! /bin/bash
-java Sokoban $1
+board=""
+while read line; do board="$board;$line"; done
+java Sokoban $board

@@ -21,50 +21,56 @@ public class Sokoban {
     boolean player = false;
     int playerX, playerY, nCols;
  
-    Sokoban(String ruta) throws FileNotFoundException, IOException {
+    Sokoban(String[] ruta) throws FileNotFoundException, IOException {
         // nCols = board[0].length();
         nCols = 0;
         destBoard = "";
         currBoard = "";
- 
+
         String line;
         String board = "";
-        FileReader f = new FileReader(ruta);
-        BufferedReader b = new BufferedReader(f);
-        while((line = b.readLine()) != null){
-            if(line.contains(",")){
-                if(!player){
-                    player = true;
-                    destBoard = "" + board;
+        for(int i = 0; i < ruta.length; i++){
+            line = ruta[i];
 
-                    String[] position = line.split(",");
-                    playerX = Integer.parseInt(position[1]);
-                    playerY = Integer.parseInt(position[0]);
-                    int pos = playerY * nCols + playerX;
-                    char[] sceneChar = board.toCharArray();
-                    sceneChar[pos] = '@';
-                    board = new String(sceneChar);
+            if(line.length() > 0){
+                // System.out.println("Line:");
+                // System.out.println(line);
+                // System.out.println("---");
+
+                if(line.contains(",")){
+                    if(!player){
+                        player = true;
+                        destBoard = "" + board;
+    
+                        String[] position = line.split(",");
+                        playerX = Integer.parseInt(position[1]);
+                        playerY = Integer.parseInt(position[0]);
+                        int pos = playerY * nCols + playerX;
+                        char[] sceneChar = board.toCharArray();
+                        sceneChar[pos] = '@';
+                        board = new String(sceneChar);
+                    } else {
+                        String[] position = line.split(",");
+                        int x = Integer.parseInt(position[1]);
+                        int y = Integer.parseInt(position[0]);
+                        int pos = y * nCols + x;
+                        char[] sceneChar = board.toCharArray();
+                        sceneChar[pos] = 'B';
+                        board = new String(sceneChar);
+                    }
                 } else {
-                    String[] position = line.split(",");
-                    int x = Integer.parseInt(position[1]);
-                    int y = Integer.parseInt(position[0]);
-                    int pos = y * nCols + x;
-                    char[] sceneChar = board.toCharArray();
-                    sceneChar[pos] = 'B';
-                    board = new String(sceneChar);
+                    board += line;
                 }
-            } else {
-                board += line;
+    
+                if(nCols == 0){
+                    nCols = line.length();
+                }
             }
 
-            if(nCols == 0){
-                nCols = line.length();
-            }
         }
 
         System.out.println("INITIAL BOARD:");
         printBoard(board);
-        b.close();
 
 
         for (int c = 0; c < board.length(); c++) {
@@ -274,8 +280,61 @@ public class Sokoban {
         return "No solution";
     }
 
+    String algIterativeDepth(int[][] dirs, char[][] dirLabels, int level){
+        Set<String> history = new HashSet<>();
+        LinkedList<Board> open = new LinkedList<>();
+ 
+        history.add(currBoard);
+        open.add(new Board(currBoard, "", playerX, playerY));
+ 
+        while (!open.isEmpty()) {
+            Board item = open.poll();
+            String cur = item.cur;
+            String sol = item.sol;
+            int x = item.x;
+            int y = item.y;
+            int countLevel = 0;
+ 
+            for (int i = 0; i < dirs.length; i++) {
+                String trial = cur;
+                int dx = dirs[i][0];
+                int dy = dirs[i][1];
+ 
+                // are we standing next to a box ?
+                if (trial.charAt((y + dy) * nCols + x + dx) == 'B') {
+ 
+                    // can we push it ?
+                    if ((trial = push(x, y, dx, dy, trial)) != null) {
+ 
+                        // or did we already try this one ?
+                        if (!history.contains(trial)) {
+ 
+                            String newSol = sol + dirLabels[i][1];
+ 
+                            if (isSolved(trial))
+                                return newSol;
+ 
+                            open.addFirst(new Board(trial, newSol, x + dx, y + dy));
+                            history.add(trial);
+                        }
+                    }
+ 
+                // otherwise try changing position
+                } else if ((trial = move(x, y, dx, dy, trial)) != null) {
+ 
+                    if (!history.contains(trial)) {
+                        String newSol = sol + dirLabels[i][0];
+                        open.add(new Board(trial, newSol, x + dx, y + dy));
+                        history.add(trial);
+                    }
+                }
+            }
+        }
+
+        return "No solution";
+    }
  
     public static void main(String[] args) throws IOException {
-        new Sokoban("./" + args[0]).solve();
+        new Sokoban(args[0].split(";")).solve();
     }
 }
