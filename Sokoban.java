@@ -126,14 +126,102 @@ public class Sokoban {
         System.out.println("");
     }
  
-    String solve() {
+    void solve() {
         char[][] dirLabels = {{'u', 'U'}, {'d', 'D'}, {'l', 'L'}, {'r', 'R'}};
         int[][] dirs = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
  
-        return algAmplitude(dirs, dirLabels);
+        System.out.println("");
+        System.out.println("==================================================");
+        System.out.println("============= ALGORITHM BY AMPLITUDE =============");
+        System.out.println("==================================================");
+        System.out.println("");
+        long tInicio, tFin, time;
+        tInicio = System.currentTimeMillis();
+        System.out.println("Movimientos: " + algAmplitude(dirs, dirLabels));
+        tFin = System.currentTimeMillis();
+        time = tFin - tInicio;
+        System.out.println("");
+        System.out.println("Tiempo de ejecución en milisegundos: " + time); 
+        System.out.println("");
+        System.out.println("");
+        System.out.println("==================================================");
+        System.out.println("=============== ALGORITHM BY DEPTH ===============");
+        System.out.println("==================================================");
+        System.out.println("");
+        tInicio = System.currentTimeMillis();
+        System.out.println("Movimientos: " + algDepth(dirs, dirLabels));
+        tFin = System.currentTimeMillis();
+        time = tFin - tInicio;
+        System.out.println("");
+        System.out.println("Tiempo de ejecución en milisegundos: " + time); 
+        System.out.println("");
+
+        // return algDepth(dirs, dirLabels);
     }
 
     String algAmplitude(int[][] dirs, char[][] dirLabels){
+        class Board {
+            String cur, sol;
+            int x, y;
+ 
+            Board(String s1, String s2, int px, int py) {
+                cur = s1;
+                sol = s2;
+                x = px;
+                y = py;
+            }
+        }
+
+        Set<String> history = new HashSet<>();
+        LinkedList<Board> open = new LinkedList<>();
+ 
+        history.add(currBoard);
+        open.add(new Board(currBoard, "", playerX, playerY));
+ 
+        while (!open.isEmpty()) {
+            Board item = open.poll();
+            String cur = item.cur;
+            String sol = item.sol;
+            int x = item.x;
+            int y = item.y;
+ 
+            for (int i = 0; i < dirs.length; i++) {
+                String trial = cur;
+                int dx = dirs[i][0];
+                int dy = dirs[i][1];
+ 
+                if (trial.charAt((y + dy) * nCols + x + dx) == 'B') {
+ 
+                    if ((trial = push(x, y, dx, dy, trial)) != null) {
+ 
+                        if (!history.contains(trial)) {
+ 
+                            String newSol = sol + dirLabels[i][1];
+ 
+                            if (isSolved(trial))
+                                return newSol;
+ 
+                            open.add(new Board(trial, newSol, x + dx, y + dy));
+                            history.add(trial);
+                        }
+                    }
+ 
+                // otherwise try changing position
+                } else if ((trial = move(x, y, dx, dy, trial)) != null) {
+ 
+                    if (!history.contains(trial)) {
+                        String newSol = sol + dirLabels[i][0];
+                        open.add(new Board(trial, newSol, x + dx, y + dy));
+                        history.add(trial);
+                    }
+                }
+            }
+        }
+
+        return "No solution";
+    }
+
+    String algDepth(int[][] dirs, char[][] dirLabels){
         class Board {
             String cur, sol;
             int x, y;
@@ -178,7 +266,7 @@ public class Sokoban {
                             if (isSolved(trial))
                                 return newSol;
  
-                            open.add(new Board(trial, newSol, x + dx, y + dy));
+                            open.addFirst(new Board(trial, newSol, x + dx, y + dy));
                             history.add(trial);
                         }
                     }
@@ -197,9 +285,9 @@ public class Sokoban {
 
         return "No solution";
     }
+
  
     public static void main(String[] args) throws IOException {
-        System.out.println(new Sokoban("./" + args[0]).solve());
-        // System.out.println(new Sokoban(level.split(","), "./nivel1.txt").solve());
+        new Sokoban("./" + args[0]).solve();
     }
 }
