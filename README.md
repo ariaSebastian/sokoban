@@ -1,5 +1,10 @@
 # SOKOBAN 0.1
 
+#### Realizado por:
+- 1710061
+- 1722104
+- 1910205
+
 Para compilar y ejecutar el script hay dos opciones:
 
 1. Ejecutar el archivo `build.sh` y posteriormente `run.sh`, esto requiere tener instalado **<abbr title="Compilador principal de Java">javac</abbr>**, que viene incluido en el JDK
