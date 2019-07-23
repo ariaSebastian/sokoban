@@ -149,7 +149,9 @@ public class Sokoban {
  
     void solve() {
         int[][] dirs = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
-        char[][] dirLabels = {{'u', 'U'}, {'d', 'D'}, {'l', 'L'}, {'r', 'R'}};
+        // La primera pos se pensaba para indicar que el movimiento fue simple, y la segunda pos para indicar que el movimiento implico mover una caja
+        // Se dejan iguales debido a las especificaciones del taller
+        char[][] dirLabels = {{'U', 'U'}, {'D', 'D'}, {'L', 'L'}, {'R', 'R'}};
  
         // solveWithAllPrints(dirs, dirLabels);
         solveSinglePrint(dirs, dirLabels);
