@@ -6,13 +6,14 @@ import java.util.*;
  
 class Board {
     String cur, sol;
-    int x, y;
+    int x, y, level;
 
-    Board(String s1, String s2, int px, int py) {
+    Board(String s1, String s2, int px, int py, int level) {
         cur = s1;
         sol = s2;
         x = px;
         y = py;
+        this.level = level;
     }
 }
 
@@ -20,6 +21,9 @@ public class Sokoban {
     String destBoard, currBoard;
     boolean player = false;
     int playerX, playerY, nCols;
+    int amplitudeCount = 0;
+    int depthCount = 0;
+    boolean prints = false;
  
     Sokoban(String[] ruta) throws FileNotFoundException, IOException {
         // nCols = board[0].length();
@@ -68,9 +72,6 @@ public class Sokoban {
             }
 
         }
-
-        System.out.println("INITIAL BOARD:");
-        printBoard(board);
 
 
         for (int c = 0; c < board.length(); c++) {
@@ -122,8 +123,10 @@ public class Sokoban {
                     != (trialBoard.charAt(i) == 'B'))
                 return false;
 
-        System.out.println("SOL:");
-        printBoard(trialBoard);
+        if(prints){
+            System.out.println("SOL:");
+            printBoard(trialBoard);
+        }
         
         return true;
     }
@@ -145,9 +148,24 @@ public class Sokoban {
     }
  
     void solve() {
-        char[][] dirLabels = {{'u', 'U'}, {'d', 'D'}, {'l', 'L'}, {'r', 'R'}};
         int[][] dirs = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
+        char[][] dirLabels = {{'u', 'U'}, {'d', 'D'}, {'l', 'L'}, {'r', 'R'}};
  
+        // solveWithAllPrints(dirs, dirLabels);
+        solveSinglePrint(dirs, dirLabels);
+    }
+
+    void solveSinglePrint(int[][] dirs, char[][] dirLabels){
+        System.out.println(algAmplitude(dirs, dirLabels));
+        System.out.println(algDepth(dirs, dirLabels));
+        System.out.println(algIterativeDepth(dirs, dirLabels, 20));
+    }
+
+    void solveWithAllPrints(int[][] dirs, char[][] dirLabels){
+        prints = true;
+        System.out.println("");
+        System.out.println("INITIAL BOARD:");
+        printBoard(destBoard);
         System.out.println("");
         System.out.println("==================================================");
         System.out.println("============= ALGORITHM BY AMPLITUDE =============");
@@ -173,8 +191,19 @@ public class Sokoban {
         System.out.println("");
         System.out.println("Tiempo de ejecución en milisegundos: " + time); 
         System.out.println("");
-
-        // return algDepth(dirs, dirLabels);
+        System.out.println("");
+        System.out.println("==================================================");
+        System.out.println("========== ALGORITHM BY ITERATIVE DEPTH ==========");
+        System.out.println("==================================================");
+        System.out.println("");
+        tInicio = System.currentTimeMillis();
+        System.out.println("Movimientos: " + algIterativeDepth(dirs, dirLabels, 20));
+        tFin = System.currentTimeMillis();
+        time = tFin - tInicio;
+        // System.out.println("depthCount: " + depthCount);
+        System.out.println("");
+        System.out.println("Tiempo de ejecución en milisegundos: " + time); 
+        System.out.println("");
     }
 
     String algAmplitude(int[][] dirs, char[][] dirLabels){
@@ -182,7 +211,7 @@ public class Sokoban {
         LinkedList<Board> open = new LinkedList<>();
  
         history.add(currBoard);
-        open.add(new Board(currBoard, "", playerX, playerY));
+        open.add(new Board(currBoard, "", playerX, playerY, 0));
  
         while (!open.isEmpty()) {
             Board item = open.poll();
@@ -190,6 +219,7 @@ public class Sokoban {
             String sol = item.sol;
             int x = item.x;
             int y = item.y;
+            int level = item.level;
  
             for (int i = 0; i < dirs.length; i++) {
                 String trial = cur;
@@ -204,10 +234,14 @@ public class Sokoban {
  
                             String newSol = sol + dirLabels[i][1];
  
-                            if (isSolved(trial))
+                            if (isSolved(trial)){
+                                if(prints){
+                                    System.out.println("Level: " + level);
+                                }
                                 return newSol;
+                            }
  
-                            open.add(new Board(trial, newSol, x + dx, y + dy));
+                            open.add(new Board(trial, newSol, x + dx, y + dy, level + 1));
                             history.add(trial);
                         }
                     }
@@ -217,7 +251,7 @@ public class Sokoban {
  
                     if (!history.contains(trial)) {
                         String newSol = sol + dirLabels[i][0];
-                        open.add(new Board(trial, newSol, x + dx, y + dy));
+                        open.add(new Board(trial, newSol, x + dx, y + dy, level + 1));
                         history.add(trial);
                     }
                 }
@@ -232,7 +266,7 @@ public class Sokoban {
         LinkedList<Board> open = new LinkedList<>();
  
         history.add(currBoard);
-        open.add(new Board(currBoard, "", playerX, playerY));
+        open.add(new Board(currBoard, "", playerX, playerY, 0));
  
         while (!open.isEmpty()) {
             Board item = open.poll();
@@ -240,6 +274,7 @@ public class Sokoban {
             String sol = item.sol;
             int x = item.x;
             int y = item.y;
+            int level = item.level;
  
             for (int i = 0; i < dirs.length; i++) {
                 String trial = cur;
@@ -257,10 +292,14 @@ public class Sokoban {
  
                             String newSol = sol + dirLabels[i][1];
  
-                            if (isSolved(trial))
+                            if (isSolved(trial)){
+                                if(prints){
+                                    System.out.println("Level: " + level);
+                                }
                                 return newSol;
- 
-                            open.addFirst(new Board(trial, newSol, x + dx, y + dy));
+                            }
+
+                            open.addFirst(new Board(trial, newSol, x + dx, y + dy, level + 1));
                             history.add(trial);
                         }
                     }
@@ -270,7 +309,7 @@ public class Sokoban {
  
                     if (!history.contains(trial)) {
                         String newSol = sol + dirLabels[i][0];
-                        open.add(new Board(trial, newSol, x + dx, y + dy));
+                        open.add(new Board(trial, newSol, x + dx, y + dy, level + 1));
                         history.add(trial);
                     }
                 }
@@ -280,12 +319,12 @@ public class Sokoban {
         return "No solution";
     }
 
-    String algIterativeDepth(int[][] dirs, char[][] dirLabels, int level){
+    String algIterativeDepth(int[][] dirs, char[][] dirLabels, int maxLevel){
         Set<String> history = new HashSet<>();
         LinkedList<Board> open = new LinkedList<>();
  
         history.add(currBoard);
-        open.add(new Board(currBoard, "", playerX, playerY));
+        open.add(new Board(currBoard, "", playerX, playerY, 0));
  
         while (!open.isEmpty()) {
             Board item = open.poll();
@@ -293,45 +332,56 @@ public class Sokoban {
             String sol = item.sol;
             int x = item.x;
             int y = item.y;
-            int countLevel = 0;
+            int level = item.level;
  
-            for (int i = 0; i < dirs.length; i++) {
-                String trial = cur;
-                int dx = dirs[i][0];
-                int dy = dirs[i][1];
- 
-                // are we standing next to a box ?
-                if (trial.charAt((y + dy) * nCols + x + dx) == 'B') {
- 
-                    // can we push it ?
-                    if ((trial = push(x, y, dx, dy, trial)) != null) {
- 
-                        // or did we already try this one ?
+            if(level <= maxLevel){
+                for (int i = 0; i < dirs.length; i++) {
+                    String trial = cur;
+                    int dx = dirs[i][0];
+                    int dy = dirs[i][1];
+     
+                    // are we standing next to a box ?
+                    if (trial.charAt((y + dy) * nCols + x + dx) == 'B') {
+     
+                        // can we push it ?
+                        if ((trial = push(x, y, dx, dy, trial)) != null) {
+     
+                            // or did we already try this one ?
+                            if (!history.contains(trial)) {
+     
+                                String newSol = sol + dirLabels[i][1];
+     
+                                if (isSolved(trial)){
+                                    if(prints){
+                                        System.out.println("Level: " + level);
+                                    }
+                                    return newSol;
+                                }
+     
+                                open.addFirst(new Board(trial, newSol, x + dx, y + dy, level + 1));
+                                history.add(trial);
+                            }
+                        }
+     
+                    // otherwise try changing position
+                    } else if ((trial = move(x, y, dx, dy, trial)) != null) {
+     
                         if (!history.contains(trial)) {
- 
-                            String newSol = sol + dirLabels[i][1];
- 
-                            if (isSolved(trial))
-                                return newSol;
- 
-                            open.addFirst(new Board(trial, newSol, x + dx, y + dy));
+                            String newSol = sol + dirLabels[i][0];
+                            open.add(new Board(trial, newSol, x + dx, y + dy, level + 1));
                             history.add(trial);
                         }
-                    }
- 
-                // otherwise try changing position
-                } else if ((trial = move(x, y, dx, dy, trial)) != null) {
- 
-                    if (!history.contains(trial)) {
-                        String newSol = sol + dirLabels[i][0];
-                        open.add(new Board(trial, newSol, x + dx, y + dy));
-                        history.add(trial);
                     }
                 }
             }
         }
 
-        return "No solution";
+        if(maxLevel < 1000){
+            return algIterativeDepth(dirs, dirLabels, maxLevel + 1);
+        } else {
+            return "No solution";
+        }
+
     }
  
     public static void main(String[] args) throws IOException {
